@@ -1,0 +1,33 @@
+{
+  "name": "StoreSettings",
+  "type": "object",
+  "properties": {
+    "store_name": {
+      "type": "string",
+      "description": "Nome da loja"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL do logo da marca"
+    },
+    "hero_image_url": {
+      "type": "string",
+      "description": "Imagem principal do banner"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "Slogan da marca"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "Link do Instagram"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "N\u00famero do WhatsApp"
+    }
+  },
+  "required": [
+    "store_name"
+  ]
+}
