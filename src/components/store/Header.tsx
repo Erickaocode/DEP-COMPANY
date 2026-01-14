@@ -1,8 +1,4 @@
-import { Link } from 'react-router-dom'
-import { ShoppingBag, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { createPageUrl } from '@/utils'
 
 type HeaderProps = {
   storeName?: string
