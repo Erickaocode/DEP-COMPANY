@@ -1,7 +1,4 @@
-import { Link } from 'react-router-dom'
-import { ShoppingBag, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { createPageUrl } from '@/utils'
 
 type HeaderProps = {
@@ -29,6 +26,7 @@ export default function Header({
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
+          {/* Logo */}
           <Link to={createPageUrl('Home')} className="font-serif text-xl font-medium tracking-tight">
             {logoUrl ? (
               <img src={logoUrl} alt={storeName} className="h-8 w-auto" />
@@ -37,6 +35,7 @@ export default function Header({
             )}
           </Link>
 
+          {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -49,7 +48,9 @@ export default function Header({
             ))}
           </nav>
 
+          {/* Ações direita */}
           <div className="flex items-center gap-3">
+            {/* Carrinho */}
             <Link to={createPageUrl('Cart')} className="relative p-1.5">
               <ShoppingBag size={22} strokeWidth={1.8} className="text-neutral-700" />
               {cartCount > 0 && (
@@ -59,6 +60,7 @@ export default function Header({
               )}
             </Link>
 
+            {/* Botão hamburger (mobile) */}
             <button
               className="md:hidden p-1.5 text-neutral-700"
               onClick={() => setMenuOpen((v) => !v)}
@@ -70,6 +72,7 @@ export default function Header({
         </div>
       </header>
 
+      {/* Menu mobile com animação */}
       <AnimatePresence>
         {menuOpen && (
           <>
