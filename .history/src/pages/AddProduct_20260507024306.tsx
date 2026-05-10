@@ -32,14 +32,13 @@ const CATEGORIES = [
   { value: 'camisa', label: 'Camisas' },
   { value: 'polo', label: 'Polo' },
   { value: 'regata', label: 'Regatas' },
-  { value: 'calca', label: 'Calças' },
-  { value: 'bermuda', label: 'Bermudas' },
 ]
 
 export default function AddProduct() {
   const [searchParams] = useSearchParams()
   const productId = searchParams.get('id')
   const isEditing = !!productId
+
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(isEditing)
@@ -73,45 +72,28 @@ export default function AddProduct() {
     setIsLoading(false)
   }, [productId])
 
-  // Converte imagem para base64 para persistir no localStorage
- const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  try {
-    setUploading(true)
-
-    // Comprime a imagem antes de salvar
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const img = new window.Image()
-      const url = URL.createObjectURL(file)
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX = 800
-        let w = img.width
-        let h = img.height
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX }
-        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX }
-        canvas.width = w
-        canvas.height = h
-        canvas.getContext('2d')?.drawImage(img, 0, 0, w, h)
-        URL.revokeObjectURL(url)
-        resolve(canvas.toDataURL('image/jpeg', 0.75))
-      }
-      img.onerror = reject
-      img.src = url
-    })
-
-    setFormData(prev => ({ ...prev, image_url: base64 }))
-    toast.success('Imagem carregada!')
-  } catch {
-    toast.error('Erro ao carregar imagem')
-  } finally {
-    setUploading(false)
+    let imageUrl: string | null = null
+    try {
+      setUploading(true)
+      imageUrl = URL.createObjectURL(file)
+      setFormData(prev => ({ ...prev, image_url: imageUrl as string }))
+      toast.success('Imagem carregada!')
+    } catch {
+      toast.error('Erro ao enviar imagem')
+      if (imageUrl) URL.revokeObjectURL(imageUrl)
+    } finally {
+      setUploading(false)
+    }
   }
-}
 
   const handleRemoveImage = () => {
+    if (formData.image_url?.startsWith('blob:')) {
+      URL.revokeObjectURL(formData.image_url)
+    }
     setFormData(prev => ({ ...prev, image_url: '' }))
   }
 
@@ -139,12 +121,11 @@ export default function AddProduct() {
 
     if (isEditing && productId) {
       updateProduct(productId, payload)
-      toast.success('Produto atualizado!')
     } else {
       saveProduct(payload)
-      toast.success('Produto criado!')
     }
 
+    toast.success(isEditing ? 'Produto atualizado!' : 'Produto criado!')
     navigate('/admin')
   }
 
@@ -176,36 +157,71 @@ export default function AddProduct() {
           <form onSubmit={handleSubmit} className="space-y-6">
 
             <Card>
-              <CardHeader><CardTitle>Informações do Produto</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Informações do Produto</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome *</Label>
-                  <Input id="name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="Ex: Camiseta Básica Branca" />
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Ex: Camiseta Básica Branca"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Descrição</Label>
-                  <Textarea id="description" value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="Descreva o produto..." rows={4} />
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Descreva o produto..."
+                    rows={4}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">Preço (R$) *</Label>
-                    <Input id="price" type="number" min="0" step="0.01" value={formData.price} onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))} placeholder="0,00" />
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="0,00"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="stock">Estoque</Label>
-                    <Input id="stock" type="number" min="0" value={formData.stock} onChange={e => setFormData(prev => ({ ...prev, stock: Number(e.target.value) }))} />
+                    <Input
+                      id="stock"
+                      type="number"
+                      min="0"
+                      value={formData.stock}
+                      onChange={e => setFormData(prev => ({ ...prev, stock: Number(e.target.value) }))}
+                      placeholder="0"
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Categoria *</Label>
-                  <Select value={formData.category} onValueChange={value => setFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
+                  <Select
+                    value={formData.category}
+                    onValueChange={value => setFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map(cat => (
-                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -214,24 +230,33 @@ export default function AddProduct() {
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div>
                     <p className="text-sm font-medium">Produto em destaque</p>
-                    <p className="text-xs text-neutral-500">Aparece na página inicial</p>
+                    <p className="text-xs text-neutral-500">Exibe na seção principal da loja</p>
                   </div>
-                  <Switch checked={formData.featured} onCheckedChange={value => setFormData(prev => ({ ...prev, featured: value }))} />
+                  <Switch
+                    checked={formData.featured}
+                    onCheckedChange={value => setFormData(prev => ({ ...prev, featured: value }))}
+                  />
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Tamanhos disponíveis</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Tamanhos disponíveis</CardTitle>
+              </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-3">
                   {ALL_SIZES.map(size => (
-                    <button key={size} type="button" onClick={() => toggleSize(size)}
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
                       className={`w-14 h-14 rounded-md border text-sm font-medium transition-all ${
                         formData.sizes.includes(size)
                           ? 'bg-neutral-900 text-white border-neutral-900'
                           : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
-                      }`}>
+                      }`}
+                    >
                       {size}
                     </button>
                   ))}
@@ -240,13 +265,22 @@ export default function AddProduct() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Imagem do Produto</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Imagem do Produto</CardTitle>
+              </CardHeader>
               <CardContent>
                 {formData.image_url ? (
                   <div className="relative w-48 h-48 rounded-lg overflow-hidden border border-neutral-200">
-                    <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
-                    <button type="button" onClick={handleRemoveImage}
-                      className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-50 transition-colors">
+                    <img
+                      src={formData.image_url}
+                      alt="Preview do produto"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-50 transition-colors"
+                    >
                       <X className="w-4 h-4 text-red-500" />
                     </button>
                   </div>
@@ -261,7 +295,13 @@ export default function AddProduct() {
                         <span className="text-xs text-neutral-400 mt-1">PNG, JPG até 10MB</span>
                       </>
                     )}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleUploadImage} disabled={uploading} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleUploadImage}
+                      disabled={uploading}
+                    />
                   </label>
                 )}
               </CardContent>

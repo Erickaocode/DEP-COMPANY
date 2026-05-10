@@ -74,42 +74,26 @@ export default function AddProduct() {
   }, [productId])
 
   // Converte imagem para base64 para persistir no localStorage
- const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  try {
-    setUploading(true)
-
-    // Comprime a imagem antes de salvar
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const img = new window.Image()
-      const url = URL.createObjectURL(file)
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX = 800
-        let w = img.width
-        let h = img.height
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX }
-        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX }
-        canvas.width = w
-        canvas.height = h
-        canvas.getContext('2d')?.drawImage(img, 0, 0, w, h)
-        URL.revokeObjectURL(url)
-        resolve(canvas.toDataURL('image/jpeg', 0.75))
-      }
-      img.onerror = reject
-      img.src = url
-    })
-
-    setFormData(prev => ({ ...prev, image_url: base64 }))
-    toast.success('Imagem carregada!')
-  } catch {
-    toast.error('Erro ao carregar imagem')
-  } finally {
-    setUploading(false)
+    try {
+      setUploading(true)
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+      setFormData(prev => ({ ...prev, image_url: base64 }))
+      toast.success('Imagem carregada!')
+    } catch {
+      toast.error('Erro ao carregar imagem')
+    } finally {
+      setUploading(false)
+    }
   }
-}
 
   const handleRemoveImage = () => {
     setFormData(prev => ({ ...prev, image_url: '' }))

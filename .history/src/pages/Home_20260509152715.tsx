@@ -12,21 +12,22 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
-  useEffect(() => {
-  const handler = () => {
+  function reload() {
     const s = getStoreSettings()
     if (s) setSettings(s)
     setProducts(getProducts().filter(p => p.featured))
     setCartItems(getCartItems())
   }
-  handler()
-  window.addEventListener('storage', handler)
-  window.addEventListener('focus', handler)
-  return () => {
-    window.removeEventListener('storage', handler)
-    window.removeEventListener('focus', handler)
-  }
-}, [])
+
+  useEffect(() => {
+    reload()
+    window.addEventListener('storage', reload)
+    window.addEventListener('focus', reload)
+    return () => {
+      window.removeEventListener('storage', reload)
+      window.removeEventListener('focus', reload)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-black">

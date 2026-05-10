@@ -12,6 +12,13 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
+  function reload() {
+    const s = getStoreSettings()
+    if (s) setSettings(s)
+    setProducts(getProducts().filter(p => p.featured))
+    setCartItems(getCartItems())
+  }
+
   useEffect(() => {
   const handler = () => {
     const s = getStoreSettings()

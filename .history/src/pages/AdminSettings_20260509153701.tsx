@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
-   Save, Store,
+  Loader2, Save, Store,
   MessageCircle, Instagram, Plus, Pencil, Trash2, Image
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -30,6 +30,11 @@ export default function AdminSettings() {
   const [products, setProducts] = useState<Product[]>([])
   const [formData, setFormData] = useState<StoreSettings>(defaultSettings)
 
+  const loadData = useCallback(() => {
+    const s = getStoreSettings()
+    if (s) setFormData(s)
+    setProducts(getProducts())
+  }, [])
 
   useEffect(() => {
   const handler = () => {

@@ -12,6 +12,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
+
   useEffect(() => {
   const handler = () => {
     const s = getStoreSettings()

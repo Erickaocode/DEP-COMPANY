@@ -12,46 +12,25 @@ type HeroSectionProps = {
 
 const SLIDES = [
   {
-    bg: '#18181b',
+    bg: 'bg-zinc-900',
     label: 'NOVA COLEÇÃO',
     headline: 'VISTA A\nRUA.',
     sub: 'Peças que falam por você — antes mesmo de abrir a boca.',
     accent: '#E8FF00',
   },
   {
-    bg: '#0a0a0a',
+    bg: 'bg-neutral-950',
     label: 'ESSENTIALS',
     headline: 'MENOS\nRUÍDO.',
     sub: 'Streetwear que resiste ao tempo e às tendências.',
     accent: '#FF3B3B',
   },
   {
-    bg: '#1c1917',
+    bg: 'bg-stone-900',
     label: 'DROP 01',
     headline: 'FEITO\nPRO ASFALTO.',
     sub: 'Do skate ao show. Da rua ao futuro.',
     accent: '#00CFFF',
-  },
-  {
-    bg: '#0f0f0f',
-    label: 'LIMITADO',
-    headline: 'POUCOS.\nELEGIDOS.',
-    sub: 'Edição limitada para quem sabe o que quer.',
-    accent: '#FF8C00',
-  },
-  {
-    bg: '#111827',
-    label: 'INVERNO 2025',
-    headline: 'FRIO\nNÃO PARA.',
-    sub: 'Peças pesadas para dias que pedem presença.',
-    accent: '#A78BFA',
-  },
-  {
-    bg: '#14532d',
-    label: 'COLLAB',
-    headline: 'DOIS\nMUNDOS.',
-    sub: 'Quando a rua encontra o estúdio.',
-    accent: '#4ADE80',
   },
 ];
 
@@ -70,57 +49,36 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
 
   return (
     <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden">
-
-      {/* Imagem de fundo FIXA — não recria ao trocar slide */}
-      {heroImage && (
-        <div className="absolute inset-0 z-0">
-          <img
-            src={heroImage}
-            alt={storeName}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/60" />
-        </div>
-      )}
-
-      {/* Cor de fundo animada por slide — fica atrás da imagem se tiver */}
+      {/* Background */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={`bg-${current}`}
-          className="absolute inset-0 z-0"
-          style={{ backgroundColor: slide.bg }}
-          initial={{ opacity: heroImage ? 0 : 1 }}
-          animate={{ opacity: heroImage ? 0 : 1 }}
+          key={current}
+          className={`absolute inset-0 ${slide.bg}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-        />
-      </AnimatePresence>
-
-      {/* Grain overlay */}
-      <div
-        className="absolute inset-0 z-10 opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-          backgroundSize: '128px',
-        }}
-      />
-
-      {/* Accent color strip animado */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`strip-${current}`}
-          className="absolute left-0 top-0 bottom-0 w-1 z-20"
-          style={{ backgroundColor: slide.accent }}
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
-          exit={{ scaleY: 0 }}
-          transition={{ duration: 0.5 }}
-        />
+        >
+          {heroImage && (
+            <img
+              src={heroImage}
+              alt={storeName}
+              className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity"
+            />
+          )}
+          {/* Grain overlay */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+              backgroundSize: '128px',
+            }}
+          />
+        </motion.div>
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative z-20 h-full flex flex-col justify-between px-8 lg:px-16 py-12">
-
+      <div className="relative z-10 h-full flex flex-col justify-between px-8 lg:px-16 py-12">
         {/* Top label */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -159,8 +117,11 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
               </p>
               <Link
                 to={createPageUrl('Products')}
-                className="group inline-flex items-center gap-3 text-sm tracking-widest uppercase font-bold px-8 py-4 transition-all duration-300 hover:scale-105"
-                style={{ background: slide.accent, color: '#000' }}
+                className="group inline-flex items-center gap-3 text-sm tracking-widest uppercase font-bold px-8 py-4 transition-all duration-300"
+                style={{
+                  background: slide.accent,
+                  color: '#000',
+                }}
               >
                 Ver Coleção
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -171,22 +132,23 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
 
         {/* Bottom controls */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {SLIDES.map((s, i) => (
+          {/* Slide counter */}
+          <div className="flex items-center gap-4">
+            {SLIDES.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className="transition-all duration-300 rounded-full"
+                className="transition-all duration-300"
                 style={{
-                  width: i === current ? '2rem' : '0.4rem',
-                  height: '0.4rem',
-                  background: i === current ? slide.accent : 'rgba(255,255,255,0.25)',
+                  width: i === current ? '2rem' : '0.5rem',
+                  height: '2px',
+                  background: i === current ? slide.accent : 'rgba(255,255,255,0.3)',
                 }}
-                aria-label={`Slide ${i + 1}`}
               />
             ))}
           </div>
 
+          {/* Arrows */}
           <div className="flex gap-3">
             <button
               onClick={prev}
@@ -205,7 +167,7 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
       </div>
 
       {/* Side label */}
-      <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20">
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 z-10">
         <span
           className="text-xs tracking-[0.3em] font-mono text-white/20"
           style={{ writingMode: 'vertical-rl' }}
