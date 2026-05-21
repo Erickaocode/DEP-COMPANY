@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-   Save, Store,
-  MessageCircle, Instagram, Plus, Pencil, Trash2, Image
-} from 'lucide-react'
+import { Loader2, Save, Store, MessageCircle, Instagram, Plus, Pencil, Trash2, Image } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -15,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Product, StoreSettings } from '@/types'
-import { getStoreSettings, saveStoreSettings, getProducts, deleteProduct } from '@/services/storage'
+import { getStoreSettings, saveStoreSettings, getProducts, deleteProduct, uploadImage } from '@/services/storage'
 
 const defaultSettings: StoreSettings = {
   store_name: '',
@@ -27,47 +24,62 @@ const defaultSettings: StoreSettings = {
 }
 
 export default function AdminSettings() {
+  const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<Product[]>([])
   const [formData, setFormData] = useState<StoreSettings>(defaultSettings)
-
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingBanner, setUploadingBanner] = useState(false)
 
   useEffect(() => {
-  const handler = () => {
-    const s = getStoreSettings()
-    if (s) setFormData(s)
-    setProducts(getProducts())
-  }
-  handler()
-  window.addEventListener('storage', handler)
-  window.addEventListener('focus', handler)
-  return () => {
-    window.removeEventListener('storage', handler)
-    window.removeEventListener('focus', handler)
-  }
-}, [])
+    async function load() {
+      const [s, p] = await Promise.all([getStoreSettings(), getProducts()])
+      if (s) setFormData(s)
+      setProducts(p)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
-  function handleSave() {
-    saveStoreSettings(formData)
-    toast.success('Configurações salvas com sucesso!')
+  async function handleSave() {
+    await saveStoreSettings(formData)
+    toast.success('Configurações salvas!')
   }
 
-  function handleImageUpload(
+  async function handleImageUpload(
     e: React.ChangeEvent<HTMLInputElement>,
     field: 'logo_url' | 'hero_image_url'
   ) {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      setFormData(prev => ({ ...prev, [field]: reader.result as string }))
+
+    if (field === 'logo_url') setUploadingLogo(true)
+    else setUploadingBanner(true)
+
+    try {
+      const url = await uploadImage(file)
+      if (!url) throw new Error('Falha no upload')
+      setFormData(prev => ({ ...prev, [field]: url }))
+      toast.success('Imagem enviada!')
+    } catch {
+      toast.error('Erro ao enviar imagem.')
+    } finally {
+      if (field === 'logo_url') setUploadingLogo(false)
+      else setUploadingBanner(false)
     }
-    reader.readAsDataURL(file)
   }
 
-  function handleDeleteProduct(id: string) {
-    deleteProduct(id)
-    setProducts(getProducts())
+  async function handleDeleteProduct(id: string) {
+    await deleteProduct(id)
+    setProducts(await getProducts())
     toast.success('Produto removido!')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin w-8 h-8 text-neutral-400" />
+      </div>
+    )
   }
 
   return (
@@ -106,12 +118,18 @@ export default function AdminSettings() {
                   <div className="space-y-2">
                     <Label>Logo</Label>
                     {formData.logo_url && <img src={formData.logo_url} alt="Logo" className="h-16 object-contain mb-2" />}
-                    <input type="file" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} className="text-sm text-neutral-600" />
+                    <div className="flex items-center gap-3">
+                      <input type="file" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} className="text-sm text-neutral-600" disabled={uploadingLogo} />
+                      {uploadingLogo && <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Banner</Label>
+                    <Label>Banner do Hero</Label>
                     {formData.hero_image_url && <img src={formData.hero_image_url} alt="Banner" className="h-24 object-cover w-full rounded mb-2" />}
-                    <input type="file" accept="image/*" onChange={e => handleImageUpload(e, 'hero_image_url')} className="text-sm text-neutral-600" />
+                    <div className="flex items-center gap-3">
+                      <input type="file" accept="image/*" onChange={e => handleImageUpload(e, 'hero_image_url')} className="text-sm text-neutral-600" disabled={uploadingBanner} />
+                      {uploadingBanner && <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />}
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">

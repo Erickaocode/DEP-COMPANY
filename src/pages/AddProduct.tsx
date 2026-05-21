@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { Product } from '@/types'
-import { getProduct, saveProduct, updateProduct } from '@/services/storage'
+import { getProduct, saveProduct, updateProduct, uploadImage } from '@/services/storage'
 
 type FormData = {
   name: string
@@ -44,6 +44,7 @@ export default function AddProduct() {
 
   const [isLoading, setIsLoading] = useState(isEditing)
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -57,59 +58,39 @@ export default function AddProduct() {
 
   useEffect(() => {
     if (!productId) return
-    const product = getProduct(productId)
-    if (product) {
-      setFormData({
-        name: product.name ?? '',
-        description: product.description ?? '',
-        price: product.price?.toString() ?? '',
-        image_url: product.image_url ?? '',
-        category: product.category ?? '',
-        sizes: product.sizes ?? ['P', 'M', 'G', 'GG'],
-        featured: !!product.featured,
-        stock: product.stock ?? 0,
-      })
-    }
-    setIsLoading(false)
+    getProduct(productId).then(product => {
+      if (product) {
+        setFormData({
+          name: product.name ?? '',
+          description: product.description ?? '',
+          price: product.price?.toString() ?? '',
+          image_url: product.image_url ?? '',
+          category: product.category ?? '',
+          sizes: product.sizes ?? ['P', 'M', 'G', 'GG'],
+          featured: !!product.featured,
+          stock: product.stock ?? 0,
+        })
+      }
+      setIsLoading(false)
+    })
   }, [productId])
 
-  // Converte imagem para base64 para persistir no localStorage
- const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  try {
-    setUploading(true)
-
-    // Comprime a imagem antes de salvar
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const img = new window.Image()
-      const url = URL.createObjectURL(file)
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX = 800
-        let w = img.width
-        let h = img.height
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX }
-        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX }
-        canvas.width = w
-        canvas.height = h
-        canvas.getContext('2d')?.drawImage(img, 0, 0, w, h)
-        URL.revokeObjectURL(url)
-        resolve(canvas.toDataURL('image/jpeg', 0.75))
-      }
-      img.onerror = reject
-      img.src = url
-    })
-
-    setFormData(prev => ({ ...prev, image_url: base64 }))
-    toast.success('Imagem carregada!')
-  } catch {
-    toast.error('Erro ao carregar imagem')
-  } finally {
-    setUploading(false)
+    try {
+      setUploading(true)
+      const url = await uploadImage(file)
+      if (!url) throw new Error('Falha no upload')
+      setFormData(prev => ({ ...prev, image_url: url }))
+      toast.success('Imagem enviada!')
+    } catch {
+      toast.error('Erro ao enviar imagem. Tente novamente.')
+    } finally {
+      setUploading(false)
+    }
   }
-}
 
   const handleRemoveImage = () => {
     setFormData(prev => ({ ...prev, image_url: '' }))
@@ -124,28 +105,34 @@ export default function AddProduct() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name || !formData.price || !formData.category) {
       toast.error('Preencha nome, preço e categoria.')
       return
     }
 
-    const payload: Omit<Product, 'id'> = {
-      ...formData,
-      price: Number(formData.price),
-      category: formData.category as Product['category'],
-    }
+    setSaving(true)
+    try {
+      const payload: Omit<Product, 'id'> = {
+        ...formData,
+        price: Number(formData.price),
+        category: formData.category as Product['category'],
+      }
 
-    if (isEditing && productId) {
-      updateProduct(productId, payload)
-      toast.success('Produto atualizado!')
-    } else {
-      saveProduct(payload)
-      toast.success('Produto criado!')
+      if (isEditing && productId) {
+        await updateProduct(productId, payload)
+        toast.success('Produto atualizado!')
+      } else {
+        await saveProduct(payload)
+        toast.success('Produto criado!')
+      }
+      navigate('/admin')
+    } catch {
+      toast.error('Erro ao salvar produto.')
+    } finally {
+      setSaving(false)
     }
-
-    navigate('/admin')
   }
 
   if (isLoading) {
@@ -253,12 +240,15 @@ export default function AddProduct() {
                 ) : (
                   <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-neutral-200 rounded-lg cursor-pointer hover:border-neutral-400 transition-colors bg-neutral-50">
                     {uploading ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+                      <>
+                        <Loader2 className="w-6 h-6 animate-spin text-neutral-400 mb-2" />
+                        <span className="text-sm text-neutral-400">Enviando imagem...</span>
+                      </>
                     ) : (
                       <>
                         <Upload className="w-6 h-6 text-neutral-400 mb-2" />
                         <span className="text-sm text-neutral-500">Clique para enviar uma imagem</span>
-                        <span className="text-xs text-neutral-400 mt-1">PNG, JPG até 10MB</span>
+                        <span className="text-xs text-neutral-400 mt-1">PNG, JPG até 50MB</span>
                       </>
                     )}
                     <input type="file" accept="image/*" className="hidden" onChange={handleUploadImage} disabled={uploading} />
@@ -271,8 +261,8 @@ export default function AddProduct() {
               <Link to="/admin">
                 <Button type="button" variant="outline">Cancelar</Button>
               </Link>
-              <Button type="submit" className="gap-2">
-                <Save className="w-4 h-4" />
+              <Button type="submit" disabled={saving} className="gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {isEditing ? 'Salvar alterações' : 'Criar produto'}
               </Button>
             </div>

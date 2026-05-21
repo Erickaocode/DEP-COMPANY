@@ -1,107 +1,148 @@
-import { Product, CartItem, StoreSettings } from '@/types';
+import { supabase } from '@/lib/supabase'
+import { Product, CartItem, StoreSettings } from '@/types'
 
-const KEYS = {
-  products: 'dep_low:products',
-  cart: 'dep_low:cart',
-  settings: 'dep_low:settings',
-};
-
-function getItem<T>(key: string): T[] {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T[]) : [];
-  } catch {
-    return [];
-  }
+// ========================
+// Products
+// ========================
+export async function getProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) { console.error(error); return [] }
+  return data as Product[]
 }
 
-function getObject<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : null;
-  } catch {
-    return null;
-  }
+export async function getProduct(id: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+  if (error) { console.error(error); return null }
+  return data as Product
 }
 
-function setItem<T>(key: string, value: T): void {
-  localStorage.setItem(key, JSON.stringify(value));
-  window.dispatchEvent(new Event('storage'));
+export async function saveProduct(data: Omit<Product, 'id'>): Promise<Product | null> {
+  const { data: result, error } = await supabase
+    .from('products')
+    .insert(data)
+    .select()
+    .single()
+  if (error) { console.error(error); return null }
+  return result as Product
 }
 
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+export async function updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Promise<Product | null> {
+  const { data: result, error } = await supabase
+    .from('products')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) { console.error(error); return null }
+  return result as Product
 }
 
-export function getProducts(): Product[] {
-  return getItem<Product>(KEYS.products);
+export async function deleteProduct(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+  if (error) { console.error(error); return false }
+  return true
 }
 
-export function getProduct(id: string): Product | null {
-  return getProducts().find(p => p.id === id) ?? null;
+// ========================
+// Store Settings
+// ========================
+export async function getStoreSettings(): Promise<StoreSettings | null> {
+  const { data, error } = await supabase
+    .from('store_settings')
+    .select('*')
+    .eq('id', 1)
+    .single()
+  if (error) { return null }
+  return data as StoreSettings
 }
 
-export function saveProduct(data: Omit<Product, 'id'>): Product {
-  const products = getProducts();
-  const newProduct: Product = { ...data, id: generateId() };
-  setItem(KEYS.products, [...products, newProduct]);
-  return newProduct;
+export async function saveStoreSettings(settings: StoreSettings): Promise<StoreSettings | null> {
+  const { data, error } = await supabase
+    .from('store_settings')
+    .upsert({ ...settings, id: 1 })
+    .select()
+    .single()
+  if (error) { console.error(error); return null }
+  return data as StoreSettings
 }
 
-export function updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Product | null {
-  const products = getProducts();
-  const index = products.findIndex(p => p.id === id);
-  if (index === -1) return null;
-  const updated = { ...products[index], ...data };
-  products[index] = updated;
-  setItem(KEYS.products, products);
-  return updated;
+// ========================
+// Cart
+// ========================
+export async function getCartItems(): Promise<CartItem[]> {
+  const { data, error } = await supabase
+    .from('cart_items')
+    .select('*')
+    .order('created_at', { ascending: true })
+  if (error) { console.error(error); return [] }
+  return data as CartItem[]
 }
 
-export function deleteProduct(id: string): boolean {
-  const products = getProducts();
-  const filtered = products.filter(p => p.id !== id);
-  if (filtered.length === products.length) return false;
-  setItem(KEYS.products, filtered);
-  return true;
-}
+export async function addCartItem(item: Omit<CartItem, 'id'>): Promise<CartItem | null> {
+  // Verifica se já existe o mesmo produto + tamanho
+  const { data: existing } = await supabase
+    .from('cart_items')
+    .select('*')
+    .eq('product_id', item.product_id)
+    .eq('size', item.size)
+    .single()
 
-export function getCartItems(): CartItem[] {
-  return getItem<CartItem>(KEYS.cart);
-}
-
-export function addCartItem(data: Omit<CartItem, 'id'>): CartItem {
-  const cart = getCartItems();
-  const existing = cart.find(
-    item => item.product_id === data.product_id && item.size === data.size
-  );
   if (existing) {
-    existing.quantity += data.quantity;
-    setItem(KEYS.cart, cart);
-    return existing;
+    const { data, error } = await supabase
+      .from('cart_items')
+      .update({ quantity: existing.quantity + item.quantity })
+      .eq('id', existing.id)
+      .select()
+      .single()
+    if (error) { console.error(error); return null }
+    return data as CartItem
   }
-  const newItem: CartItem = { ...data, id: generateId() };
-  setItem(KEYS.cart, [...cart, newItem]);
-  return newItem;
+
+  const { data, error } = await supabase
+    .from('cart_items')
+    .insert(item)
+    .select()
+    .single()
+  if (error) { console.error(error); return null }
+  return data as CartItem
 }
 
-export function removeCartItem(id: string): boolean {
-  const cart = getCartItems();
-  const filtered = cart.filter(item => item.id !== id);
-  if (filtered.length === cart.length) return false;
-  setItem(KEYS.cart, filtered);
-  return true;
+export async function removeCartItem(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('cart_items')
+    .delete()
+    .eq('id', id)
+  if (error) { console.error(error); return false }
+  return true
 }
 
-export function clearCart(): void {
-  setItem(KEYS.cart, []);
+export async function clearCart(): Promise<void> {
+  await supabase.from('cart_items').delete().neq('id', '')
 }
 
-export function getStoreSettings(): StoreSettings | null {
-  return getObject<StoreSettings>(KEYS.settings);
-}
+// ========================
+// Upload de imagem
+// ========================
+export async function uploadImage(file: File, bucket: string = 'images'): Promise<string | null> {
+  const ext = file.name.split('.').pop()
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-export function saveStoreSettings(data: StoreSettings): StoreSettings {
-  setItem(KEYS.settings, data);
-  return data;
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(filename, file, { cacheControl: '3600', upsert: false })
+
+  if (error) { console.error(error); return null }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename)
+  return data.publicUrl
 }

@@ -8,51 +8,17 @@ import ProductDetail from './pages/ProductDetail'
 import AdminSettings from './pages/AdminSettings'
 import AddProduct from './pages/AddProduct'
 
-import { CartItem, Product, StoreSettings } from './types'
-import { getCartItems, getProducts, getStoreSettings } from './services/storage'
-
-const initialCart = getCartItems()
-const initialProducts = getProducts()
-const initialSettings = getStoreSettings() ?? { store_name: 'Minha Loja' }
+import { CartItem } from './types'
 
 export default function App() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCart)
-  const [products] = useState<Product[]>(initialProducts)
-  const [storeSettings] = useState<StoreSettings>(initialSettings)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route
-        path="/products"
-        element={
-          <Products
-            products={products}
-            cartItems={cartItems}
-            storeSettings={storeSettings}
-          />
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <Cart
-            initialCartItems={cartItems}
-            storeSettings={storeSettings}
-          />
-        }
-      />
-      <Route
-        path="/product/:id"
-        element={
-          <ProductDetail
-            products={products}
-            cartItems={cartItems}
-            setCartItems={setCartItems}
-            storeSettings={storeSettings}
-          />
-        }
-      />
+      <Route path="/products" element={<Products />} />
+      <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
+      <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} setCartItems={setCartItems} />} />
       <Route path="/admin" element={<AdminSettings />} />
       <Route path="/add-product" element={<AddProduct />} />
     </Routes>
