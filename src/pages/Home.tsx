@@ -8,6 +8,33 @@ import { Loader2 } from 'lucide-react'
 import { StoreSettings, Product, CartItem } from '@/types'
 import { getStoreSettings, getProducts, getCartItems } from '@/services/storage'
 
+function DepLowLogoLarge() {
+  return (
+    <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-xs">
+      <text
+        x="200" y="120"
+        textAnchor="middle"
+        fontFamily="'Arial Black', 'Arial Bold', sans-serif"
+        fontWeight="900"
+        fontSize="100"
+        fill="white"
+        letterSpacing="-2"
+      >DEP</text>
+      <line x1="60" y1="135" x2="340" y2="135" stroke="white" strokeWidth="4"/>
+      <text
+        x="200" y="220"
+        textAnchor="middle"
+        fontFamily="'Arial Black', 'Arial Bold', sans-serif"
+        fontWeight="900"
+        fontSize="100"
+        fill="white"
+        letterSpacing="-2"
+      >LOW</text>
+      <polygon points="200,255 178,238 222,238" fill="white"/>
+    </svg>
+  )
+}
+
 export default function Home() {
   const [settings, setSettings] = useState<StoreSettings>({ store_name: 'DEP LOW' })
   const [products, setProducts] = useState<Product[]>([])
@@ -63,17 +90,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 bg-zinc-950 text-white">
+      <section className="py-24 bg-black text-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               <p className="text-xs tracking-[0.4em] text-zinc-500 font-mono mb-4">SOBRE A MARCA /</p>
               <h2 className="text-4xl font-black tracking-tighter uppercase mb-6">Nossa História</h2>
-              <p className="text-zinc-400 leading-relaxed mb-4">Cada peça é cuidadosamente selecionada para trazer qualidade e estilo ao seu guarda-roupa.</p>
-              <p className="text-zinc-400 leading-relaxed">Com materiais premium e atenção aos detalhes, criamos roupas que você vai amar usar todos os dias.</p>
+              <p className="text-zinc-400 leading-relaxed mb-4">
+                Cada peça é cuidadosamente selecionada para trazer qualidade e estilo ao seu guarda-roupa.
+              </p>
+              <p className="text-zinc-400 leading-relaxed">
+                Com materiais premium e atenção aos detalhes, criamos roupas que você vai amar usar todos os dias.
+              </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="aspect-square bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-              <span className="text-zinc-700 text-xs tracking-widest uppercase font-mono">Sua foto aqui</span>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="aspect-square bg-black border border-zinc-800 flex items-center justify-center"
+            >
+              <DepLowLogoLarge />
             </motion.div>
           </div>
         </div>

@@ -7,7 +7,7 @@ export default function Footer() {
         </h1>
 
         <p className="text-zinc-400">
-          © 2026 DEP LOW. Todos os direitos reservados.
+          © 2026 ERICK|DEV. Todos os direitos reservados.
         </p>
       </div>
     </footer>
