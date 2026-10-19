@@ -61,7 +61,7 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
   useEffect(() => {
     const t = setInterval(() => setCurrent(p => (p + 1) % SLIDES.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [current]); // reinicia o timer quando o usuário troca de slide manualmente
 
   const slide = SLIDES[current];
 
@@ -190,12 +190,14 @@ export default function HeroSection({ heroImage, storeName, tagline }: HeroSecti
           <div className="flex gap-3">
             <button
               onClick={prev}
+              aria-label="Slide anterior"
               className="w-10 h-10 border border-white/20 text-white/60 hover:text-white hover:border-white/60 transition-all flex items-center justify-center"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <button
               onClick={next}
+              aria-label="Próximo slide"
               className="w-10 h-10 border border-white/20 text-white/60 hover:text-white hover:border-white/60 transition-all flex items-center justify-center"
             >
               <ArrowRight className="w-4 h-4" />

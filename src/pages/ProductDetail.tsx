@@ -130,11 +130,11 @@ export default function ProductDetail({ cartItems, setCartItems }: ProductDetail
                 <div className="mb-10">
                   <h3 className="text-xs tracking-widest text-neutral-500 uppercase mb-4">Quantidade</h3>
                   <div className="flex items-center gap-4">
-                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:border-neutral-600 transition-colors">
+                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir quantidade" className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:border-neutral-600 transition-colors">
                       <Minus className="w-4 h-4" />
                     </button>
                     <span className="w-6 text-center">{quantity}</span>
-                    <button onClick={() => setQuantity(q => q + 1)} className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:border-neutral-600 transition-colors">
+                    <button onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar quantidade" className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:border-neutral-600 transition-colors">
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>

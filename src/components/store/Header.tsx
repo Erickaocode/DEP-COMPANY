@@ -79,7 +79,7 @@ export default function Header({
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link to={createPageUrl('Cart')} className="relative p-1.5">
+            <Link to={createPageUrl('Cart')} className="relative p-1.5" aria-label="Carrinho">
               <ShoppingBag size={20} strokeWidth={1.5} className="text-zinc-400 hover:text-white transition-colors" />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -92,6 +92,7 @@ export default function Header({
               className="md:hidden p-1.5 text-zinc-400 hover:text-white"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"
+              aria-expanded={menuOpen}
             >
               {menuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
             </button>

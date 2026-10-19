@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useParams } from 'react-router-dom'
 
 import Home from './pages/Home'
 import Products from './pages/Products'
@@ -11,6 +11,17 @@ import NotFound from './pages/NotFound'
 
 import { CartItem } from './types'
 
+type CartState = {
+  cartItems: CartItem[]
+  setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>
+}
+
+// key pelo id: ao trocar de produto, tamanho/quantidade/loading voltam ao estado inicial
+function ProductDetailRoute(props: CartState) {
+  const { id } = useParams()
+  return <ProductDetail key={id} {...props} />
+}
+
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
@@ -19,7 +30,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products />} />
       <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
-      <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} setCartItems={setCartItems} />} />
+      <Route path="/product/:id" element={<ProductDetailRoute cartItems={cartItems} setCartItems={setCartItems} />} />
       <Route path="/admin" element={<AdminSettings />} />
       <Route path="/add-product" element={<AddProduct />} />
       <Route path="*" element={<NotFound />} />

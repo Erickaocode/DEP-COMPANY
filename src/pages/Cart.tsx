@@ -103,7 +103,7 @@ export default function Cart({ cartItems, setCartItems }: CartProps) {
                         R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
-                    <button onClick={() => handleRemove(item.id)} className="text-neutral-400 hover:text-neutral-900 transition-colors self-start">
+                    <button onClick={() => handleRemove(item.id)} aria-label={`Remover ${item.product_name}`} className="text-neutral-400 hover:text-neutral-900 transition-colors self-start">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </motion.div>
