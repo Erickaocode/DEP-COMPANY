@@ -6,8 +6,6 @@ export function createPageUrl(pageName: string): string {
     About: '/#sobre',
     Contact: '/#contato',
     ProductDetail: '/product/:id',
-    AdminSettings: '/admin',
-    AddProduct: '/add-product',
   };
 
   return routes[pageName] ?? '/';

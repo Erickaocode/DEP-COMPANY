@@ -92,7 +92,7 @@ export default function Home() {
           ) : (
             <div className="text-center py-20 border border-zinc-800">
               <p className="text-zinc-600 font-mono text-sm mb-4">// NENHUM DESTAQUE</p>
-              <p className="text-zinc-700 text-xs tracking-widest">Ative "destaque" em um produto no painel admin</p>
+              <p className="text-zinc-700 text-xs tracking-widest">Novidades em breve</p>
             </div>
           )}
         </div>
