@@ -25,3 +25,7 @@ dist-ssr
 
 .vercel
 .env*.local
+
+# Histórico local do VS Code e artefatos de build do TypeScript
+.history
+*.tsbuildinfo
