@@ -99,7 +99,7 @@ export default function Products() {
         </div>
       </section>
 
-      <Footer />
+      <Footer instagram={settings.instagram} whatsapp={settings.whatsapp} />
     </div>
   )
 }

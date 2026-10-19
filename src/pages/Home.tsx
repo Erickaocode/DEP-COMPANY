@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import HeroSection from '@/components/store/HeroSection'
@@ -40,6 +41,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
+  const { hash } = useLocation()
 
   useEffect(() => {
     async function load() {
@@ -55,6 +57,12 @@ export default function Home() {
     }
     load()
   }, [])
+
+  // Rola até a seção do link (#sobre, #contato) depois que a página carrega
+  useEffect(() => {
+    if (!hash || loading) return
+    document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+  }, [hash, loading])
 
   return (
     <div className="min-h-screen bg-black">
@@ -90,7 +98,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 bg-black text-white">
+      <section id="sobre" className="py-24 bg-black text-white scroll-mt-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -122,7 +130,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
+      <Footer instagram={settings.instagram} whatsapp={settings.whatsapp} />
     </div>
   )
 }

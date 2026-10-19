@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Trash2, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
-import { createPageUrl } from '@/utils'
+import { createPageUrl, whatsappUrl } from '@/utils'
 import { toast } from 'sonner'
 
 import { CartItem, StoreSettings } from '@/types'
@@ -39,16 +39,17 @@ export default function Cart({ cartItems, setCartItems }: CartProps) {
   }
 
   const handleWhatsAppOrder = () => {
-    if (!settings.whatsapp) {
-      toast.error('WhatsApp não configurado')
-      return
-    }
     let message = `Olá! Gostaria de fazer um pedido:\n\n`
     cartItems.forEach(item => {
       message += `• ${item.product_name} - Tam: ${item.size} - Qtd: ${item.quantity} - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}\n`
     })
     message += `\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*`
-    window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(message)}`, '_blank')
+    const url = whatsappUrl(settings.whatsapp, message)
+    if (!url) {
+      toast.error('WhatsApp não configurado')
+      return
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   if (loading) {
@@ -124,7 +125,7 @@ export default function Cart({ cartItems, setCartItems }: CartProps) {
           )}
         </div>
       </div>
-      <Footer />
+      <Footer instagram={settings.instagram} whatsapp={settings.whatsapp} />
     </div>
   )
 }

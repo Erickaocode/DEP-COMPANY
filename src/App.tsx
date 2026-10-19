@@ -7,6 +7,7 @@ import Cart from './pages/Cart'
 import ProductDetail from './pages/ProductDetail'
 import AdminSettings from './pages/AdminSettings'
 import AddProduct from './pages/AddProduct'
+import NotFound from './pages/NotFound'
 
 import { CartItem } from './types'
 
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} setCartItems={setCartItems} />} />
       <Route path="/admin" element={<AdminSettings />} />
       <Route path="/add-product" element={<AddProduct />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

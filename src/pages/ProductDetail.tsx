@@ -79,7 +79,7 @@ export default function ProductDetail({ cartItems, setCartItems }: ProductDetail
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-neutral-500">Produto não encontrado</p>
-        <Link to="/" className="text-neutral-900 underline text-sm">Voltar</Link>
+        <Link to="/products" className="text-neutral-900 underline text-sm">Ver coleção</Link>
       </div>
     )
   }
@@ -92,7 +92,7 @@ export default function ProductDetail({ cartItems, setCartItems }: ProductDetail
 
       <div className="pt-28 pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
+          <Link to="/products" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Voltar para coleção
           </Link>
 
@@ -149,7 +149,7 @@ export default function ProductDetail({ cartItems, setCartItems }: ProductDetail
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer instagram={settings.instagram} whatsapp={settings.whatsapp} />
     </div>
   )
 }
