@@ -6,7 +6,7 @@ import ProductCard from '@/components/store/ProductCard'
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { StoreSettings, Product, CartItem } from '@/types'
-import { getStoreSettings, getProducts, getCartItems } from '@/services/storage'
+import { getStoreSettings, getProducts, getCartItems, countCartItems } from '@/services/storage'
 
 function DepLowLogoLarge() {
   return (
@@ -58,7 +58,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={cartItems.length} />
+      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={countCartItems(cartItems)} />
       <HeroSection heroImage={settings.hero_image_url} storeName={settings.store_name} tagline={settings.tagline} />
 
       <section className="py-24 px-6 lg:px-12 bg-black">

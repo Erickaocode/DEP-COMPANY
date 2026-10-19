@@ -77,57 +77,60 @@ export async function saveStoreSettings(settings: StoreSettings): Promise<StoreS
 }
 
 // ========================
-// Cart
+// Cart (por visitante, salvo no navegador)
 // ========================
+const CART_KEY = 'dep_low:cart'
+
+function readCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_KEY)
+    return raw ? (JSON.parse(raw) as CartItem[]) : []
+  } catch {
+    return []
+  }
+}
+
+function writeCart(items: CartItem[]): void {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(items))
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export async function getCartItems(): Promise<CartItem[]> {
-  const { data, error } = await supabase
-    .from('cart_items')
-    .select('*')
-    .order('created_at', { ascending: true })
-  if (error) { console.error(error); return [] }
-  return data as CartItem[]
+  return readCart()
 }
 
 export async function addCartItem(item: Omit<CartItem, 'id'>): Promise<CartItem | null> {
-  // Verifica se já existe o mesmo produto + tamanho
-  const { data: existing } = await supabase
-    .from('cart_items')
-    .select('*')
-    .eq('product_id', item.product_id)
-    .eq('size', item.size)
-    .single()
+  const cart = readCart()
 
+  // Se já existe o mesmo produto + tamanho, soma a quantidade
+  const existing = cart.find(i => i.product_id === item.product_id && i.size === item.size)
   if (existing) {
-    const { data, error } = await supabase
-      .from('cart_items')
-      .update({ quantity: existing.quantity + item.quantity })
-      .eq('id', existing.id)
-      .select()
-      .single()
-    if (error) { console.error(error); return null }
-    return data as CartItem
+    const updated = { ...existing, quantity: existing.quantity + item.quantity }
+    writeCart(cart.map(i => (i.id === existing.id ? updated : i)))
+    return updated
   }
 
-  const { data, error } = await supabase
-    .from('cart_items')
-    .insert(item)
-    .select()
-    .single()
-  if (error) { console.error(error); return null }
-  return data as CartItem
+  const created: CartItem = { ...item, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }
+  writeCart([...cart, created])
+  return created
 }
 
 export async function removeCartItem(id: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('cart_items')
-    .delete()
-    .eq('id', id)
-  if (error) { console.error(error); return false }
-  return true
+  const cart = readCart()
+  const filtered = cart.filter(i => i.id !== id)
+  writeCart(filtered)
+  return filtered.length !== cart.length
 }
 
 export async function clearCart(): Promise<void> {
-  await supabase.from('cart_items').delete().neq('id', '')
+  writeCart([])
+}
+
+export function countCartItems(items: CartItem[]): number {
+  return items.reduce((sum, item) => sum + item.quantity, 0)
 }
 
 // ========================

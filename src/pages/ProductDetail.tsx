@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 import { Product, CartItem, StoreSettings } from '@/types'
-import { getProduct, getStoreSettings, addCartItem, getCartItems } from '@/services/storage'
+import { getProduct, getStoreSettings, addCartItem, getCartItems, countCartItems } from '@/services/storage'
 
 type ProductDetailProps = {
   cartItems: CartItem[]
@@ -88,7 +88,7 @@ export default function ProductDetail({ cartItems, setCartItems }: ProductDetail
 
   return (
     <div className="min-h-screen bg-white">
-      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={cartItems.length} />
+      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={countCartItems(cartItems)} />
 
       <div className="pt-28 pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">

@@ -5,7 +5,7 @@ import ProductCard from '@/components/store/ProductCard'
 import { motion } from 'framer-motion'
 import { SlidersHorizontal, Loader2 } from 'lucide-react'
 import { Product, CartItem, StoreSettings } from '@/types'
-import { getProducts, getCartItems, getStoreSettings } from '@/services/storage'
+import { getProducts, getCartItems, getStoreSettings, countCartItems } from '@/services/storage'
 
 type Category = 'all' | 'camiseta' | 'camisa' | 'polo' | 'regata' | 'calca' | 'bermuda'
 
@@ -43,7 +43,7 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={cartItems.length} />
+      <Header storeName={settings.store_name} logoUrl={settings.logo_url} cartCount={countCartItems(cartItems)} />
 
       <div className="pt-32 pb-12 border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
