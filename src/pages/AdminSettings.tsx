@@ -29,6 +29,7 @@ export default function AdminSettings() {
   const [formData, setFormData] = useState<StoreSettings>(defaultSettings)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -41,8 +42,11 @@ export default function AdminSettings() {
   }, [])
 
   async function handleSave() {
-    await saveStoreSettings(formData)
-    toast.success('Configurações salvas!')
+    setSaving(true)
+    const saved = await saveStoreSettings(formData)
+    setSaving(false)
+    if (saved) toast.success('Configurações salvas!')
+    else toast.error('Erro ao salvar configurações.')
   }
 
   async function handleImageUpload(
@@ -68,9 +72,14 @@ export default function AdminSettings() {
     }
   }
 
-  async function handleDeleteProduct(id: string) {
-    await deleteProduct(id)
-    setProducts(await getProducts())
+  async function handleDeleteProduct(product: Product) {
+    if (!window.confirm(`Excluir "${product.name}"? Essa ação não pode ser desfeita.`)) return
+    const ok = await deleteProduct(product.id)
+    if (!ok) {
+      toast.error('Erro ao remover produto.')
+      return
+    }
+    setProducts(prev => prev.filter(p => p.id !== product.id))
     toast.success('Produto removido!')
   }
 
@@ -141,7 +150,9 @@ export default function AdminSettings() {
                       <Input value={formData.whatsapp ?? ''} onChange={e => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))} placeholder="5511999999999" />
                     </div>
                   </div>
-                  <Button onClick={handleSave}><Save size={16} className="mr-2" />Salvar</Button>
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}Salvar
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
@@ -177,7 +188,7 @@ export default function AdminSettings() {
                       <Link to={`/add-product?id=${p.id}`}>
                         <Button variant="outline" size="icon"><Pencil size={14} /></Button>
                       </Link>
-                      <Button variant="outline" size="icon" onClick={() => handleDeleteProduct(p.id)}>
+                      <Button variant="outline" size="icon" onClick={() => handleDeleteProduct(p)} aria-label={`Excluir ${p.name}`}>
                         <Trash2 size={14} className="text-red-500" />
                       </Button>
                     </div>

@@ -5,7 +5,7 @@ export type Product = {
   price: number;
   image_url?: string;
   sizes?: string[];
-  category?: 'camiseta' | 'camisa' | 'polo' | 'regata';
+  category?: 'camiseta' | 'camisa' | 'polo' | 'regata' | 'calca' | 'bermuda';
   featured?: boolean;
   stock?: number;
 };

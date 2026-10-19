@@ -59,7 +59,9 @@ export default function AddProduct() {
   useEffect(() => {
     if (!productId) return
     getProduct(productId).then(product => {
-      if (product) {
+      if (!product) {
+        toast.error('Produto não encontrado.')
+      } else {
         setFormData({
           name: product.name ?? '',
           description: product.description ?? '',
@@ -107,8 +109,17 @@ export default function AddProduct() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.price || !formData.category) {
+    if (!formData.name.trim() || !formData.price || !formData.category) {
       toast.error('Preencha nome, preço e categoria.')
+      return
+    }
+    const price = Number(formData.price)
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error('Informe um preço válido.')
+      return
+    }
+    if (formData.sizes.length === 0) {
+      toast.error('Selecione pelo menos um tamanho.')
       return
     }
 
@@ -116,17 +127,17 @@ export default function AddProduct() {
     try {
       const payload: Omit<Product, 'id'> = {
         ...formData,
-        price: Number(formData.price),
+        name: formData.name.trim(),
+        price,
+        stock: Math.max(0, Math.floor(formData.stock || 0)),
         category: formData.category as Product['category'],
       }
 
-      if (isEditing && productId) {
-        await updateProduct(productId, payload)
-        toast.success('Produto atualizado!')
-      } else {
-        await saveProduct(payload)
-        toast.success('Produto criado!')
-      }
+      const saved = isEditing && productId
+        ? await updateProduct(productId, payload)
+        : await saveProduct(payload)
+      if (!saved) throw new Error('Falha ao salvar')
+      toast.success(isEditing ? 'Produto atualizado!' : 'Produto criado!')
       navigate('/admin')
     } catch {
       toast.error('Erro ao salvar produto.')
