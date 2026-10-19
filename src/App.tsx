@@ -8,6 +8,8 @@ import ProductDetail from './pages/ProductDetail'
 import AdminSettings from './pages/AdminSettings'
 import AddProduct from './pages/AddProduct'
 import NotFound from './pages/NotFound'
+import Login from './pages/Login'
+import RequireAdmin from './components/RequireAdmin'
 
 import { CartItem } from './types'
 
@@ -31,8 +33,9 @@ export default function App() {
       <Route path="/products" element={<Products />} />
       <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
       <Route path="/product/:id" element={<ProductDetailRoute cartItems={cartItems} setCartItems={setCartItems} />} />
-      <Route path="/admin" element={<AdminSettings />} />
-      <Route path="/add-product" element={<AddProduct />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+      <Route path="/add-product" element={<RequireAdmin><AddProduct /></RequireAdmin>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

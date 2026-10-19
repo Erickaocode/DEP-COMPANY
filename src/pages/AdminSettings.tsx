@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, Save, Store, MessageCircle, Instagram, Plus, Pencil, Trash2, Image } from 'lucide-react'
+import { Loader2, Save, Store, MessageCircle, Instagram, Plus, Pencil, Trash2, Image, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Product, StoreSettings } from '@/types'
+import { signOut } from '@/hooks/useAdmin'
 import { getStoreSettings, saveStoreSettings, getProducts, deleteProduct, uploadImage } from '@/services/storage'
 
 const defaultSettings: StoreSettings = {
@@ -96,7 +97,12 @@ export default function AdminSettings() {
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
           <h1 className="text-lg font-medium">Painel Administrativo</h1>
-          <Link to="/"><Button variant="outline">Ver Loja</Button></Link>
+          <div className="flex gap-2">
+            <Link to="/"><Button variant="outline">Ver Loja</Button></Link>
+            <Button variant="ghost" onClick={() => signOut()} className="gap-2">
+              <LogOut size={16} /> Sair
+            </Button>
+          </div>
         </div>
       </header>
 
