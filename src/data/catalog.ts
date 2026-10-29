@@ -11,10 +11,10 @@ import { Product, StoreSettings } from '@/types'
 export const STORE_SETTINGS: StoreSettings = {
   store_name: 'DEP LOW',
   logo_url: '',
-  hero_image_url: '',
+  hero_image_url: '/hero.png',
   tagline: '',
-  instagram: '',
-  whatsapp: '',
+  instagram: '@deplow.br',
+  whatsapp: '5511994842434',
 }
 
 // A ordem aqui é a ordem em que aparecem no site.
