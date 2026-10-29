@@ -54,4 +54,14 @@ export const PRODUCTS: Product[] = [
     category: 'polo',
     featured: true,
   },
+  {
+    id: 'camiseta-dep-low',
+    name: 'Camisa Dep low',
+    description: 'Camisa no estilo',
+    price: 80,
+    image_url: '/products/camiseta-dep-low.png',
+    sizes: ['P', 'M', 'G', 'GG'],
+    category: 'camiseta',
+    featured: true,
+  },
 ]
