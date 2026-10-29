@@ -30,4 +30,28 @@ export const PRODUCTS: Product[] = [
   //   category: 'camiseta',            // camiseta | camisa | polo | regata | calca | bermuda
   //   featured: true,                  // aparece em "Destaques" na Home
   // },
+  {
+    id: 'polo-essential',
+    name: 'Camisa polo Dep low',
+    description:
+      'DEP LOW — Polo Essential\n\n' +
+      'Minimalista, versátil e atemporal.\n' +
+      'A Polo Essential da DEP LOW foi criada para quem carrega estilo sem precisar chamar atenção. Com visual clean e identidade urbana, a peça combina conforto, presença e autenticidade em cada detalhe.\n\n' +
+      'O logo discreto no peito reforça a essência da marca:\n' +
+      'base, foco, constância e evolução.\n\n' +
+      'Confeccionada com tecido premium e caimento moderno, entrega conforto no dia a dia sem perder a estética streetwear minimalista.\n\n' +
+      'Detalhes\n' +
+      'Modelagem confortável\n' +
+      'Gola polo estruturada\n' +
+      'Logo frontal minimalista\n' +
+      'Acabamento premium\n' +
+      'Identidade discreta e urbana\n' +
+      'Preto e branco monocromático\n\n' +
+      'DEP LOW — Mais que roupa. Um estilo de vida.',
+    price: 110,
+    image_url: '/products/polo-essential.png',
+    sizes: ['P', 'M', 'G', 'GG'],
+    category: 'polo',
+    featured: true,
+  },
 ]
